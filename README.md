@@ -1,15 +1,16 @@
-# Code Auditor — AI 驱动的代码审计 Skill
+# Code Auditor — AI Agent 代码审计指令集
 
 > **教 AI 真正理解和运用静态语法纠错工具进行代码审计，而不是只会调用预设脚本。**
 
-[![Trae IDE](https://img.shields.io/badge/Trae%20IDE-Skill-6C47FF)](https://www.trae.com.cn/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
 ## 项目简介
 
-**Code Auditor** 是一个为 Trae IDE 设计的 AI 技能（Skill），它教会 AI 模型如何**真正理解**静态语法纠错工具的原理和用法，从而能够全自动化地对代码仓库进行语法检查、代码质量审计和安全扫描。
+**Code Auditor** 是一套**面向所有 AI Agent 的代码审计指令集**（Skill / Prompt / Instruction Set），它教会 AI 模型如何**真正理解**静态语法纠错工具的原理和用法，从而能够全自动化地对代码仓库进行语法检查、代码质量审计和安全扫描。
+
+无论是 Claude、GPT、Gemini，还是其他支持工具调用的 AI Agent，都可以加载这套指令集来获得代码审计能力。
 
 ### 与普通 "脚本调用式" 审计的区别
 
@@ -29,7 +30,7 @@
 真正懂审计 = 理解工具原理 + 灵活构建命令 + 智能解读输出
 ```
 
-本 Skill 将指导 AI 完成以下 10 步审计流程：
+本指令集指导 AI 完成以下 10 步审计流程：
 
 1. **发现目标** — 定位要审计的代码文件/目录
 2. **克隆仓库** — 如果是 GitHub 链接，先 `git clone` 到本地
@@ -47,12 +48,12 @@
 ## 项目结构
 
 ```
-.trae/skills/code-auditor/
-├── SKILL.md              ← 技能主文件（教 AI 理解审计）
-└── scripts/              ← 已删，改为纯教学（备份在 scripts-backup/）
+code-auditor/
+├── SKILL.md              ← 核心指令集（教 AI 理解审计）
+└── scripts-backup/       ← 预设脚本备份（仅供参考）
 ```
 
-> **理念**：我们选择教 AI "渔" 而不是给 AI "鱼"。不再提供预设脚本，而是让 AI 真正理解每个工具的工作原理，从而能灵活应对各种项目场景。
+> **核心理念**：教 AI "渔" 而不是给 AI "鱼"。不依赖预设脚本，而是让 AI 真正理解每个工具的工作原理，从而能灵活应对各种项目场景。
 
 ---
 
@@ -135,7 +136,6 @@ flake8 .
 ### 完整 Rust 项目审计
 
 ```bash
-# cargo check 在某些情况下可以替代编译检查
 cargo check --workspace 2>&1
 rustfmt --check src/**/*.rs
 ```
@@ -155,31 +155,36 @@ AI 能智能识别工具输出的不同模式：
 
 ---
 
-## 安装使用
+## 使用方式
 
 ### 前提条件
 
-- [Trae IDE](https://www.trae.com.cn/) 已安装
+- AI Agent 需具备**命令行执行能力**（如 Claude Code、GPT with Terminal、Trae IDE 等）
 - 目标语言的审计工具已安装（如 `gcc`、`ruff`、`eslint` 等）
+- **审计 GitHub 仓库时需要 `git` 已安装并可用**
 
-### 安装步骤
+### 加载指令集
 
-1. 克隆本仓库：
-```bash
-git clone https://github.com/your-username/code-auditor-skill.git
-```
+#### 方式一：作为 System Prompt / Skill 加载（推荐）
 
-2. 将 `code-auditor` 文件夹复制到 Trae 的 skills 目录：
-```bash
-# Windows
-copy -Recurse .trae/skills/code-auditor %USERPROFILE%/.trae/skills/code-auditor
-```
+将 `SKILL.md` 的内容作为 System Prompt 或 Skill 定义提供给 AI Agent。不同的 AI 平台有不同的加载方式：
 
-3. 在 Trae IDE 中向 AI 发起审计请求即可自动触发。
+| 平台 | 加载方式 |
+|------|---------|
+| **Claude Code / Claude.ai** | 导入作为 Project Knowledge 或 Custom Instruction |
+| **Trae IDE** | 放入 `.trae/skills/` 目录，AI 自动加载 |
+| **GitHub Copilot / Cursor** | 将 `SKILL.md` 内容写入 `.cursorrules` 或项目文档 |
+| **OpenAI GPTs** | 粘贴到 Instructions 字段中 |
+| **自定义 AI Agent** | 在 System Prompt 中引用 `SKILL.md` 的内容 |
+| **任何支持工具调用的 LLM** | 将 `SKILL.md` 作为上下文指令提供给模型 |
+
+#### 方式二：作为上下文参考
+
+在会话开始时，通过 Read 或上传方式将 `SKILL.md` 内容提供给 AI。
 
 ---
 
-## Skill 设计原则
+## 指令集设计原则
 
 1. **先问再动手** — 每次审计前先确认策略深度
 2. **理解而非记忆** — 教 AI 理解工具原理，而非背诵命令
@@ -187,6 +192,7 @@ copy -Recurse .trae/skills/code-auditor %USERPROFILE%/.trae/skills/code-auditor
 4. **容错执行** — 工具缺失时跳过，不中断审计
 5. **非破坏性** — 所有命令均为只读
 6. **灵活适配** — 根据项目结构/语言/环境动态调整
+7. **平台无关** — 面向所有 AI Agent，不绑定特定平台
 
 ---
 
